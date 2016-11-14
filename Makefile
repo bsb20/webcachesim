@@ -1,18 +1,8 @@
-CXX=g++
-RM=rm -f
-CPPFLAGS=-g -std=c++11
-LDFLAGS=-g -std=c++11
+all:
+	clang++ -I./ -std=c++11 -stdlib=libc++ request_stream.cpp event.cpp machine.cpp main.cpp -o cache
 
-SRCSIM=webcachesim.cc
-OBJS=$(subst .cc,.o,$(SRCSIM))
+debug:
+	clang++ -I./ -std=c++11 -stdlib=libc++ request_stream.cpp event.cpp machine.cpp main.cpp -o cache -g
 
-all: webcachesim
-
-webcachesim: $(OBJS)
-	$(CXX) $(LDFLAGS) -o webcachesim $(OBJS)
-
-clean:
-	$(RM) $(OBJS)
-
-dist-clean: clean
-	$(RM) tool
+test:
+	./cache test.trace 0 LRU 1

@@ -4,15 +4,19 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <vector>
+#include <queue>
 #include <stdarg.h>
 #include <map>
+#include "request.h"
+#include "listener.h"
 
 
 
 using namespace std;
 
 // uncomment to enable cache debugging:
-//#define CDEBUG 1
+#define CDEBUG 1
 
 // util for debug
 #ifdef CDEBUG
@@ -32,7 +36,7 @@ public:
   virtual unique_ptr<Cache> create_unique() = 0;
 };
 
-class Cache {
+class Cache : public listener<request>{
 public:
   // create and destroy a cache
   Cache() : cache_size(0), current_size(0), hits(0), bytehits(0), logStatistics(false) {
@@ -41,14 +45,34 @@ public:
 
   // configure cache parameters
   virtual void setSize(long long cs) {cache_size = cs;
-    cerr << cache_size << endl;}
+    cerr << "Cache size: " << cache_size << endl;}
+
+
   virtual void setPar(string parName, string parValue) {}
+    
+    virtual void notify(request req){
+        bool hit(request(req.get_id(), req.get_size()));
+        auto resp = std::make_shared<response>(req.get_id(),req.get_timestamp(), hit ? 0:1, hit);
+        for(auto it=listeners.begin(); it!= listeners.end(); it++){
+            resp->listen(*it);
+        }
+        event_queue->push(resp);
+
+    }
 
   // request an object from the cache
   virtual bool request (const long cur_req, const long long size) {}
 
   // check in cache (debugging)
   virtual bool lookup (const long cur_req) const {}
+
+    void set_event_queue(std::priority_queue<std::shared_ptr<event> >* event_queue){
+        this->event_queue = event_queue; 
+    }
+
+    void listen(listener<response>* listener){
+        listeners.push_back(listener);
+    }
 
   // statistics
   void startStatistics() {
@@ -107,8 +131,14 @@ protected:
     if(logStatistics) {
       hits++;
       bytehits+=size;
+        }
     }
-  }
+
+private:
+   std::priority_queue<std::shared_ptr<event> >* event_queue;
+   std::vector<listener<response>* > listeners;
+        
+
 };
 
 template<class T>

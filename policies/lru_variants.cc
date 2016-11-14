@@ -67,8 +67,8 @@ protected:
 
   virtual void miss(const long cur_req, const long size) {
     // object feasible to store?
-    if(size >= cache_size) {
-      LOG("L",0,size,cache_size);
+    if(size > cache_size) {
+      LOG("L",cur_req,size,cache_size);
       return;
     }
     list_iterator_t lit;  
