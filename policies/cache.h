@@ -8,8 +8,11 @@
 #include <queue>
 #include <stdarg.h>
 #include <map>
+
 #include "request.h"
+#include "event.h"
 #include "listener.h"
+#include "event_queue.h"
 
 
 
@@ -56,19 +59,14 @@ public:
         for(auto it=listeners.begin(); it!= listeners.end(); it++){
             resp->listen(*it);
         }
-        event_queue->push(resp);
+        event_queue::push(resp);
 
     }
 
   // request an object from the cache
-  virtual bool request (const long cur_req, const long long size) {}
-
+  virtual bool request (const long cur_req, const long long size) = 0;
   // check in cache (debugging)
-  virtual bool lookup (const long cur_req) const {}
-
-    void set_event_queue(std::priority_queue<std::shared_ptr<event> >* event_queue){
-        this->event_queue = event_queue; 
-    }
+  virtual bool lookup (const long cur_req) const = 0;
 
     void listen(listener<response>* listener){
         listeners.push_back(listener);
@@ -135,7 +133,6 @@ protected:
     }
 
 private:
-   std::priority_queue<std::shared_ptr<event> >* event_queue;
    std::vector<listener<response>* > listeners;
         
 

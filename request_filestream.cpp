@@ -1,10 +1,9 @@
-#include "request_stream.h"
+#include "request_filestream.h"
 #include <sstream>
 #include <iostream>
-#include "request.h"
-request_stream::request_stream(std::string filename):source_file(filename){}
+request_filestream::request_filestream(std::string filename):source_file(filename){}
 
-std::shared_ptr<request> request_stream::next(){
+std::shared_ptr<request> request_filestream::next(){
     std::string line;
     if(std::getline(source_file, line)){
         std::istringstream is(line);

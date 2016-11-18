@@ -1,20 +1,24 @@
 #include "machine.h"
 #include <iostream>
+#include "event_queue.h"
 
-machine::machine(request_stream& requests, Cache& c):timestamp(0), requests(requests), cache(c){
+machine::machine(request_stream& requests, Cache& c):timestamp(0), reqs(0), hits(0), requests(requests), cache(c){
+}
+machine::~machine(){
+    std::cout << "Hits: " << hits << std::endl;
+    std::cout << "Requests: " << reqs << std::endl;
 }
 
 void machine::start(){
-    cache.set_event_queue(&event_queue);
     cache.listen(this);
     auto first = requests.next();
     first->listen(this);
     first->listen(&cache);
-    event_queue.push(first);
+    event_queue::push(first);
 }
 
 void machine::notify(request r){
-   reqs++; 
+    reqs++; 
 }
 
 void machine::notify(response r){
@@ -28,19 +32,19 @@ void machine::notify(response r){
         auto next = requests.next();
         next->listen(this);
         next->listen(&cache);
-        event_queue.push(next);
+        event_queue::push(next);
     }
     catch(int){
-        std::cerr << "Reqs: " << reqs << std::endl;
-        std::cerr << "Hits: " << hits << std::endl;
         std::cerr << "DONE" << std::endl;
     }
 }
 
 bool machine::process(){
-    if(!event_queue.empty()){
-        std::shared_ptr<event> next(event_queue.top());
-        event_queue.pop();
+    if(reqs > 100){
+        return false;
+    }
+    if(!event_queue::empty()){
+        std::shared_ptr<event> next(event_queue::pop());
         timestamp = next->get_timestamp();
         next->process();
         return true;
