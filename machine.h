@@ -12,6 +12,7 @@ class machine : public listener<request>, public listener<response>{
 
     public:
         machine(request_stream& requests, Cache& c);
+        ~machine();
         bool process();
         void start();
         virtual void notify(response event);
@@ -19,7 +20,6 @@ class machine : public listener<request>, public listener<response>{
 
 
     private:
-        std::priority_queue<std::shared_ptr<event> > event_queue;
         uint64_t timestamp;
         uint32_t reqs;
         uint32_t hits;

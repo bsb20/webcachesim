@@ -1,12 +1,12 @@
 #include "machine.h"
-#include "request_stream.h"
+#include "request_filestream.h"
 #include "request.h"
 #include <cstdint>
 #include <fstream>
 #include <regex>
 #include "policies/lru_variants.cc"
 #include "policies/gd_variants.cc"
-
+#include "request_rand_stream.h"
 
 int main(int argc, char* argv[]){
     // output help if insufficient params
@@ -47,7 +47,8 @@ int main(int argc, char* argv[]){
       paramSummary += opmatch[2];
     }
 
-    request_stream s(path);
+    //request_filestream s(path);
+    request_rand_stream s({8,9}, {.5, .5});
     machine m(s, *webcache);
     m.start();
     while(m.process()){}

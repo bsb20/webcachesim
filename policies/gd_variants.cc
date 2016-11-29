@@ -89,7 +89,7 @@ public:
     }
   }
 
-  virtual bool request (const long cur_req, long size) {
+  virtual bool request (const long cur_req, const long long size) {
     if (cache_map.count(cur_req) > 0) {
 	if (size == get<1>(get<1>(*(cache_map[cur_req]))) ) {
 	  // hit
@@ -144,7 +144,7 @@ public:
 
   ~GDSFCache(){}
 
-  bool request (const long cur_req, const long size) {
+    virtual bool request (const long cur_req, const long long size) {
     if (cache_map.count(cur_req) > 0) {
       if (size == get<1>(get<1>(*(cache_map[cur_req]))) ) {
 	// hit and consistent object size
@@ -232,7 +232,7 @@ public:
     }
   }
 
-  bool request (const long cur_req, const long size) {
+  virtual bool request (const long cur_req, const long long size) {
     curtime++;
     if (cache_map.count(cur_req) > 0) {
       if (size == get<1>(get<1>(*(cache_map[cur_req]))) ) {
@@ -272,7 +272,7 @@ public:
   LFUDACache(): GreedyDualBase() {}
   ~LFUDACache(){}
 
-  bool request (const long cur_req, const long size) {
+  virtual bool request (const long cur_req, const long long size) {
     if (cache_map.count(cur_req) > 0) {
       if (size == get<1>(get<1>(*(cache_map[cur_req]))) ) {
 	// hit and consistent object size

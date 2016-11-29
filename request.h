@@ -4,10 +4,10 @@
 #include "event.h"
 #include <vector>
 #include "listener.h"
-#include "request_stream.h"
 #include <iostream>
 
 class request_stream;
+
 
 class request : public event{
 
