@@ -1,16 +1,13 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <list>
-#include <tuple>
 #include <assert.h>
 #include <random>
 #include <math.h>
-#include "cache.h"
+#include "policies/cache.h"
 
 using namespace std;
 
-typedef tuple<long, long> object_t; // objectid, size
-typedef list<object_t>::iterator list_iterator_t;
 
 /*
   LRU: Least Recently Used eviction
@@ -39,15 +36,15 @@ public:
     it = cache_map.find(cur_req);
     if(it != cache_map.end())
       {
-	if (size == get<1>(*(it->second))) {
-	  // hit and consistent size
-	  LOG("h",0,cur_req,size);
-	  hit(it, size);
-	  return(true);
-	}
-	else { // inconsistent size -> treat as miss and delete inconsistent entry
-	  evict(cur_req);
-	}
+	    if (size == get<1>(*(it->second))) {
+	      // hit and consistent size
+	      LOG("h",0,cur_req,size);
+	      hit(it, size);
+	      return(true);
+	    }
+	    else { // inconsistent size -> treat as miss and delete inconsistent entry
+	      evict(cur_req);
+	    }
       }
     miss(cur_req, size);
     return(false);

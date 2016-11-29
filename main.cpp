@@ -6,6 +6,7 @@
 #include <regex>
 #include "policies/lru_variants.cc"
 #include "policies/gd_variants.cc"
+#include "policies/mdp_variants.cc"
 #include "request_rand_stream.h"
 
 int main(int argc, char* argv[]){
@@ -48,7 +49,7 @@ int main(int argc, char* argv[]){
     }
 
     //request_filestream s(path);
-    request_rand_stream s({8,9}, {.5, .5});
+    request_rand_stream s({40,100,200}, {.4, .3, .3});
     machine m(s, *webcache);
     m.start();
     while(m.process()){}

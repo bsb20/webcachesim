@@ -8,15 +8,22 @@
 #include <queue>
 #include <stdarg.h>
 #include <map>
+#include <tuple>
+#include <list>
+
 
 #include "request.h"
 #include "event.h"
 #include "listener.h"
 #include "event_queue.h"
 
+typedef std::tuple<long, long> object_t; // objectid, size
+typedef std::list<object_t>::iterator list_iterator_t;
 
 
 using namespace std;
+
+
 
 // uncomment to enable cache debugging:
 #define CDEBUG 1

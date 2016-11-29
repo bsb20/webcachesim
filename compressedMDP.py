@@ -1,11 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import matplotlib
 # matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import numpy as np
 import math
-import analytical_model as model
 
 np.set_printoptions(precision=2)
 
@@ -231,7 +230,7 @@ def value_iteration(p,d,h,e,s,drag,allow_plot=False):
         # simple = slope * np.arange(len(rdd))
         # simple[d1+1:] += 1 - slope * d2
         # simple[d2+1:] = 0
-        simple = model.analysis_modal(p,d,False)
+#        simple = model.analysis_modal(p,d,False)
         ax.plot(simple)
         line, = ax.plot(v[0])
         plt.ion()
@@ -368,20 +367,21 @@ if __name__ == '__main__':
     rdd[d2] = p2
     rdd[d3] = p3
     ed = np.sum(np.arange(n) * rdd) # expected reuse distance = working set size
-    s = ed
+    s = 128
+    print s
     #assert ed > d2
 
     #analysis(p,d)
     # fill_rdd([p1,p2,d2],[d1,d2,d3],20)
     drag = 1
-    # [h,e] = parse_policy([0],p,d,s)[1:3]
+    [h,e] = parse_policy([0],p,d,s)[1:3]
     #analysis_modal(p,d,True)
 
     #print opt_policy(p,d,s)
-    p = [0.2,0.4,0.4]
-    d = [50,120,300]
-    h = rdd
-    e = np.zeros_like(rdd)
+#    p = [0.2,0.4,0.4]
+#    d = [50,120,300]
+#    h = rdd
+#    e = np.zeros_like(rdd)
     print value_iteration(p,d,h,e,s,drag,False)
     #print policy_iteration(p,d,s,drag)
 

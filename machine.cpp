@@ -40,7 +40,7 @@ void machine::notify(response r){
 }
 
 bool machine::process(){
-    if(reqs > 100){
+    if(reqs > 100000){
         return false;
     }
     if(!event_queue::empty()){
