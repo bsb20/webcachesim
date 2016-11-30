@@ -46,7 +46,6 @@ public:
 	      evict(cur_req);
 	    }
       }
-    miss(cur_req, size);
     return(false);
   }
   
@@ -62,7 +61,7 @@ protected:
     Cache::hit(size);
   }
 
-  virtual void miss(const long cur_req, const long size) {
+  virtual void miss(const long cur_req, const long long size) {
     // object feasible to store?
     if(size > cache_size) {
       LOG("L",cur_req,size,cache_size);
@@ -179,7 +178,7 @@ public:
   long long overall_cache_size;
   LRUCache previous;
 
-  virtual void miss(const long cur_req, const long size) {
+  virtual void miss(const long cur_req, const long long size) {
     // object feasible to store?
     if(size >= cache_size) {
       LOG("error",0,size,cache_size);
@@ -240,7 +239,7 @@ protected:
     return(LRUCache::request(cur_req, size));
   }
   
-  virtual void miss(const long cur_req, const long size) {
+  virtual void miss(const long cur_req, const long long size) {
     if(filter[cur_req]<=npar)
       return ;
     LRUCache::miss(cur_req, size);

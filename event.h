@@ -9,6 +9,9 @@ class event{
         virtual ~event(){};
 
         inline uint32_t get_timestamp() const {return timestamp;}
+
+        virtual void print() =0;
+
         virtual void process(){}
 
 

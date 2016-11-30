@@ -25,9 +25,6 @@ void machine::notify(response r){
     if(r.was_hit()){
         hits++;
     }
-    else{
-        std::cout << "Miss latency: " << r.get_latency() << std::endl;
-    }
     try{
         auto next = requests.next();
         next->listen(this);
@@ -45,6 +42,8 @@ bool machine::process(){
     }
     if(!event_queue::empty()){
         std::shared_ptr<event> next(event_queue::pop());
+        //DEBUG
+        //next->print();
         timestamp = next->get_timestamp();
         next->process();
         return true;

@@ -4,7 +4,7 @@
 template<typename T>
 class listener{
     public:
-        virtual void notify(T event){};
+        virtual void notify(T event)=0;
 };
 
 #endif /* LISTENER_H */

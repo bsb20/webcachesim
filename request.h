@@ -19,6 +19,10 @@ class request : public event{
             event(timestamp){
         }
 
+        virtual void print(){
+            std::cout << "REQ " << id << std::endl;
+        }
+
         virtual void process(){
             for(auto it=listeners.begin(); it!= listeners.end(); it++){
                 (*it)->notify(*this);

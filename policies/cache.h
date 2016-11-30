@@ -13,9 +13,11 @@
 
 
 #include "request.h"
+#include "fetch.h"
 #include "event.h"
 #include "listener.h"
 #include "event_queue.h"
+#include "backends/backend_system.h"
 
 typedef std::tuple<long, long> object_t; // objectid, size
 typedef std::list<object_t>::iterator list_iterator_t;
@@ -45,38 +47,54 @@ public:
   CacheFactory() {}
   virtual unique_ptr<Cache> create_unique() = 0;
 };
+class Cache : public listener<request>, public listener<fetch>{
+    
+    public:
+    // create and destroy a cache
+    Cache() : cache_size(0), current_size(0), hits(0), bytehits(0), logStatistics(false) {
+    }
+    virtual ~Cache(){};
 
-class Cache : public listener<request>{
-public:
-  // create and destroy a cache
-  Cache() : cache_size(0), current_size(0), hits(0), bytehits(0), logStatistics(false) {
-  }
-  virtual ~Cache(){};
+    template<typename T>
+    void bind(){
+        backend = std::unique_ptr<T>(new T);
+    }
 
-  // configure cache parameters
-  virtual void setSize(long long cs) {cache_size = cs;
-    cerr << "Cache size: " << cache_size << endl;}
+    // configure cache parameters
+    virtual void setSize(long long cs) {cache_size = cs;
+        cerr << "Cache size: " << cache_size << endl;
+    }
 
 
-  virtual void setPar(string parName, string parValue) {}
+    virtual void setPar(string parName, string parValue) {}
     
     virtual void notify(request req){
         bool hit(request(req.get_id(), req.get_size()));
-        auto resp = std::make_shared<response>(req.get_id(),req.get_timestamp(), hit ? 0:1, hit);
+        auto resp = std::make_shared<response>(req.get_id(),req.get_timestamp(), hit);
         for(auto it=listeners.begin(); it!= listeners.end(); it++){
             resp->listen(*it);
         }
         event_queue::push(resp);
-
+        if(backend && !hit){
+            backend->process(req, this);
+        }
     }
 
-  // request an object from the cache
-  virtual bool request (const long cur_req, const long long size) = 0;
-  // check in cache (debugging)
-  virtual bool lookup (const long cur_req) const = 0;
+    // request an object from the cache
+    virtual bool request (const long cur_req, const long long size) = 0;
+    // check in cache (debugging)
+    virtual bool lookup (const long cur_req) const = 0;
+
+    virtual void notify(fetch fetch_event){
+        miss(fetch_event.get_id(), fetch_event.get_size());
+    }
+
 
     void listen(listener<response>* listener){
         listeners.push_back(listener);
+        if(backend){
+            backend->listen(listener);
+        }
     }
 
   // statistics
@@ -106,6 +124,8 @@ public:
   static void registerType(string name, CacheFactory *factory) {
     get_factory_instance()[name] = factory;
   }
+
+  template<typename T=backend_system>
   static unique_ptr<Cache> create_unique(string name) {
     unique_ptr<Cache> Cache_instance;
     if(get_factory_instance().count(name) != 1) {
@@ -113,6 +133,7 @@ public:
       return nullptr;
     }
     Cache_instance = move(get_factory_instance()[name]->create_unique());
+    Cache_instance->bind<T>();
     return Cache_instance;
   }
 
@@ -139,8 +160,12 @@ protected:
         }
     }
 
+
+    virtual void miss(const long cur_req, const long long size)=0;
+
 private:
    std::vector<listener<response>* > listeners;
+   unique_ptr<backend_system> backend;
         
 
 };

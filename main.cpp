@@ -48,10 +48,11 @@ int main(int argc, char* argv[]){
       paramSummary += opmatch[2];
     }
 
-    //request_filestream s(path);
-    request_rand_stream s({40,100,200}, {.4, .3, .3});
+    request_filestream s(path);
+    //request_rand_stream s({40,100,200}, {.4, .3, .3});
     machine m(s, *webcache);
     m.start();
-    while(m.process()){}
+    while(m.process()){
+    }
     return 0;
 }

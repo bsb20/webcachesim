@@ -160,9 +160,9 @@ def log_values(values):
     
 n = 512
 if __name__ == '__main__':
-    p = [0.25, 0.25, 0.5]
-    d = [40,80,320]
-    s = 80
+    p = [0.4, 0.3, 0.3]
+    d = [40,100,200]
+    s = 50
 
     rdd = np.zeros(n)
     for i in range(len(d)):
