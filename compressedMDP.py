@@ -198,7 +198,7 @@ n = 1024
 if __name__ == '__main__':
     p = [0.25, 0.25, 0.5]
     d = [40,80,320]
-    s = 80
+    s = 6
 
     # rdd = np.zeros(n)
     # for i in range(len(d)):
@@ -206,6 +206,6 @@ if __name__ == '__main__':
     # ed = np.sum(np.arange(n) * rdd) # expected reuse distance = working set size
     # assert ed > d2
 
-    # trimodal.analysis(p,d)
+    trimodal.analysis(p,d)
     drag = 0.9999
     values = policy_iteration(p,d,s,drag)
