@@ -1,0 +1,17 @@
+Plans towards 781 poster
+
+Writing up the draft of the poster. Have it done over the weekend. 
+
+Ben:
+
+Discretely approximate real world trace reuse distance distribution.
+
+Brandon:
+
+The analysis code to give an intuitive feeling of how the policy is going to
+improve over LRU. (It requires matplotlib package, however. It you don't want
+it, just comment out the import line and the 209th line in compressedMDP.py)
+
+Extend multi-modal example analytically.
+
+Minor modification: set value function domain as big as RDD suggests.

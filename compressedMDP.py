@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 
 import matplotlib.pyplot as plt
 import numpy as np
 import math
-import traceGen 
-import cache 
+# import analytical_model as model
+import trimodal
 
 np.set_printoptions(precision=2)
 
@@ -21,13 +21,24 @@ def value_iteration(values,p,d,h,e,s,drag,allow_plot=False):
 
     h = np.where(h < 1e-5, np.zeros_like(h), h)
     boundry = np.argmax(np.cumsum(h))
-    print "boundry = %d " %boundry
 
     cumevents = np.cumsum((h+e)[::-1])[::-1]
     cumevents = np.where(cumevents < 1e-5, np.ones_like(cumevents), cumevents)
 
-
     if allow_plot:
+        plt.close('all')
+        plt.figure()
+        plt.subplot(3,1,1)
+        plt.plot(h)
+        plt.title('hit')
+        plt.subplot(3,1,2)
+        plt.plot(e)
+        plt.title('eviction')
+        plt.subplot(3,1,3)
+        plt.plot(cumevents)
+        plt.title('cumevents')
+        plt.show()
+
         plt.close('all')
         fig = plt.figure(figsize=(6,6))
         ax = fig.add_subplot(1,1,1)
@@ -80,15 +91,19 @@ def value_iteration(values,p,d,h,e,s,drag,allow_plot=False):
 
 def policy_iteration(p,d,s,drag=1):
     ed = round(np.dot(p,d))
-    step = - int(ed/8.)
-    assert abs(step) >= 1
+    # step = - int(ed/8.)
+    # assert abs(step) >= 1
     # cache_size = range(int(ed),s,step) + [s,]
-    cache_size = [s] * 10
+    cache_size = [s] * 2
     # values = np.zeros(max(d)+10)
     values = np.arange(max(d))
     for s in cache_size:
 
-        [miss_rate,h,e] = sim_policy(values,p,d,s)
+        # [opt,opt_miss_rate] = trimodal.opt_policy(p,d,s)
+
+        # [h,e] = sim_policy(values,p,d,s)[1:3]
+
+        [h,e] = parse_policy(values,p,d,s)[1:3]
         
         if h[d[-1]] < 1e-5:
             h = fill_rdd(p,d,h)
@@ -108,6 +123,8 @@ def sim_policy(values,p,d,s):
     trace = traceGen.TraceDistribution(idealRdDist)
     trace.generate(10000)
 
+    plt.close('all')
+    plt.figure()
     def idealRdDistNonSparse():
         cump = 0.
         i = 0
@@ -119,6 +136,18 @@ def sim_policy(values,p,d,s):
             rdd[d] = cump * len(trace.trace)
         return rdd
 
+    plt.plot(idealRdDistNonSparse(), label='Ideal RD dist')
+    plt.plot(np.cumsum(trace.rdDist), label='Actual RD dist')
+    plt.legend(loc='best')
+    plt.show()
+
+    plt.figure()
+    plt.plot(values)
+    plt.xlabel('age')
+    plt.ylabel('value')
+    plt.ylim([min(values[0:max(d)]),max(values[0:max(d)])])
+    plt.show()
+
     my_cache = cache.Cache(s,values)
 
     for i in range(len(trace.trace)):
@@ -128,6 +157,13 @@ def sim_policy(values,p,d,s):
     events = float(sum(my_cache.get_hit_ages()) + sum(my_cache.get_evict_ages()))
     h = my_cache.get_hit_ages() / events
     e = my_cache.get_evict_ages() / events
+    # plot hit and eviction distribution
+    plt.figure()
+    plt.subplot(2,1,1,title='hit age distribution')
+    plt.plot(np.cumsum(my_cache.get_hit_ages()/events))
+    plt.subplot(2,1,2,title='evict age distribution')
+    plt.plot(np.cumsum(my_cache.get_evict_ages()/events))
+    plt.show()
 
     return miss_rate, h, e
 
@@ -158,17 +194,18 @@ def log_values(values):
         f.write("%.2f " %v )
     f.close()
     
-n = 512
+n = 1024
 if __name__ == '__main__':
-    p = [0.4, 0.3, 0.3]
-    d = [40,100,200]
-    s = 50
+    p = [0.25, 0.25, 0.5]
+    d = [40,80,320]
+    s = 6
 
-    rdd = np.zeros(n)
-    for i in range(len(d)):
-        rdd[d[i]] = p[i]
-    ed = np.sum(np.arange(n) * rdd) # expected reuse distance = working set size
+    # rdd = np.zeros(n)
+    # for i in range(len(d)):
+    #     rdd[d[i]] = p[i]
+    # ed = np.sum(np.arange(n) * rdd) # expected reuse distance = working set size
+    # assert ed > d2
 
+    trimodal.analysis(p,d)
     drag = 0.9999
     values = policy_iteration(p,d,s,drag)
-    log_values(values)
